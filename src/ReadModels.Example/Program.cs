@@ -80,7 +80,7 @@ namespace ReadModels.Example
 			var repo = container.Resolve<IEntityRepository<Person>>();
 			Dump(repo.Find(query));
 
-			Console.WriteLine("Query for all Persons in Org Unit ID 2, LastName='Crumb'");
+			Console.WriteLine("Query for all Persons in Location ID 2, LastName='Crumb'");
 			query = new IndexQuery<Person>();
 			query.AddIndex(indexes.Find<LocationOrderByLastName>(), 2.ToString(CultureInfo.InvariantCulture));
 			query.AddIndex(indexes.Find<LastNameOrderByLastName>(), "Crumb");

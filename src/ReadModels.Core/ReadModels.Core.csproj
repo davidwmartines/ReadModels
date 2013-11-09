@@ -79,7 +79,7 @@
     <Compile Include="Index.cs" />
     <Compile Include="IndexQuery.cs" />
     <Compile Include="IndexQueryResult.cs" />
-    <Compile Include="IndexRegistry.cs" />
+    <Compile Include="UnityIndexRegistry.cs" />
     <Compile Include="IEntityIndexer.cs" />
     <Compile Include="PowerSet.cs" />
     <Compile Include="Redis\RedisEntityRepository.cs" />

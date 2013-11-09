@@ -1,5 +1,4 @@
-﻿
-namespace ReadModels.Core
+﻿namespace ReadModels.Core
 {
 	public interface IEntityPersister<T>
 	{

@@ -4,7 +4,6 @@ using Microsoft.Practices.Unity;
 
 namespace ReadModels.Core
 {
-	
 
 	public class UnityIndexRegistry<TEntity> : IIndexRegistry<TEntity>
 	{
@@ -23,18 +22,8 @@ namespace ReadModels.Core
 
 		public void Register(IIndex<TEntity> index)
 		{
-			//index.Id = IndexId.Next();
 			_container.RegisterInstance<IIndex<TEntity>>(index.GetType().Name, index);
 		}
 	}
 
-	//public static class IndexId
-	//{
-	//	private static int _id;
-
-	//	public static int Next()
-	//	{
-	//		return ++_id;
-	//	}
-	//}
 }

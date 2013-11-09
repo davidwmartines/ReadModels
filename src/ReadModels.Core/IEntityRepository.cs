@@ -12,5 +12,4 @@ namespace ReadModels.Core
 		void DeleteAll();
 		IndexQueryResult<T> Find(IndexQuery<T> query);
 	}
-
 }

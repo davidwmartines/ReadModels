@@ -15,7 +15,7 @@ namespace ReadModels.Core
 
 		public abstract int Id { get; }
 
-		protected string CreateKey( string propertyValue)
+		protected string CreateKey(string propertyValue)
 		{
 			return string.Concat(Id, ":", propertyValue);
 		}

@@ -6,16 +6,7 @@ namespace ReadModels.Core
 {
 	public class IndexComposer<T>
 	{
-		//private List<string> _indexKeys = new List<string>();
-
 		private IDictionary<IIndex<T>, string[]> _indexes = new Dictionary<IIndex<T>, string[]>();
-
-		//public void AddIndex(IIndex<T> index, string value)
-		//{
-		//	if (_indexKeys.Any() && !index.IsComposable)
-		//		throw new InvalidOperationException("Query can only contain a single index when using a non-composable index.");
-		//	_indexKeys.Add(index.FindKey(value));
-		//}
 
 		public void AddIndex(IIndex<T> index, params string[] values)
 		{
