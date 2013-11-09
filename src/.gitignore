@@ -1,0 +1,3 @@
+.nuget/NuGet.exe
+packages/*
+!packages/repositories.config
