@@ -1,7 +1,4 @@
-﻿using System;
-using System.Globalization;
-
-namespace ReadModels.Core
+﻿namespace ReadModels.Core
 {
 	public class EntityPersister<T> : IEntityPersister<T>
 	{

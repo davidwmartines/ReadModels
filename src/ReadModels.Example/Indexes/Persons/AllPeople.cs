@@ -5,7 +5,7 @@ namespace ReadModels.Example.Indexes.Persons
 {
 	public class AllPeople: PersonIndex
 	{
-		public override IEnumerable<string> CreateKeys(Person entitiy)
+		public override IEnumerable<string> CreateKeys(Person entity)
 		{
 			yield return CreateKey(string.Empty);
 		}
