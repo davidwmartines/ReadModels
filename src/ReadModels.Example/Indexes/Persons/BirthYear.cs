@@ -18,10 +18,5 @@ namespace ReadModels.Example.Indexes.Persons
 		{
 			return items.OrderBy(i => i.DateOfBirth);
 		}
-
-		public override int Id
-		{
-			get { return 101; }
-		}
 	}
 }

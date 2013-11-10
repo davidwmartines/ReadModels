@@ -2,10 +2,9 @@
 using System.Linq;
 using Microsoft.Practices.Unity;
 
-namespace ReadModels.Core
+namespace ReadModels.Core.Containers.Unity
 {
-
-	public class UnityIndexRegistry<TEntity> : IIndexRegistry<TEntity>
+	public class UnityIndexRegistry<TEntity>
 	{
 		private IUnityContainer _container;
 
@@ -15,15 +14,9 @@ namespace ReadModels.Core
 			_container.RegisterType<IEnumerable<IIndex<TEntity>>>(new InjectionFactory(c => c.ResolveAll<IIndex<TEntity>>().ToArray()));
 		}
 
-		public IIndex<TEntity> Find<TIndex>() where TIndex : IIndex<TEntity>
-		{
-			return _container.Resolve<IIndex<TEntity>>(typeof(TIndex).Name);
-		}
-
 		public void Register(IIndex<TEntity> index)
 		{
-			_container.RegisterInstance<IIndex<TEntity>>(index.GetType().Name, index);
+			_container.RegisterInstance<IIndex<TEntity>>(index.Name, index);
 		}
 	}
-
 }

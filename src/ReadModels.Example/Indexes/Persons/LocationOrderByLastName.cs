@@ -14,10 +14,5 @@ namespace ReadModels.Example.Indexes.Persons
 
 			return new string[0];
 		}
-
-		public override int Id
-		{
-			get { return 104; }
-		}
 	}
 }

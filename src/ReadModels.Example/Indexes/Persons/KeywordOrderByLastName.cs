@@ -14,10 +14,5 @@ namespace ReadModels.Example.Indexes.Persons
 				CreateKey(entity.FullName)
 			};
 		}
-
-		public override int Id
-		{
-			get { return 105; }
-		}
 	}
 }

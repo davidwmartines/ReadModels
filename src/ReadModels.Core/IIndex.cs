@@ -8,6 +8,6 @@ namespace ReadModels.Core
 		string FindKey(string propertyValue);
 		IEnumerable<T> SortEntries(IEnumerable<T> items);
 		bool IsComposable { get; }
-		int Id { get; }
+		string Name { get; }
 	}
 }

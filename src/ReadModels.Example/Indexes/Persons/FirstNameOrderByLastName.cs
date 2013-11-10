@@ -9,10 +9,5 @@ namespace ReadModels.Example.Indexes.Persons
 		{
 			yield return CreateKey(entitiy.FirstName);
 		}
-
-		public override int Id
-		{
-			get { return 102; }
-		}
 	}
 }

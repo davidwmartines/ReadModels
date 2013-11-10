@@ -2,6 +2,7 @@
 using System.Globalization;
 using Microsoft.Practices.Unity;
 using ReadModels.Core;
+using ReadModels.Core.Containers.Unity;
 using ReadModels.Core.Redis;
 using ReadModels.Example.Indexes.Persons;
 using ReadModels.Example.Model;
@@ -54,7 +55,7 @@ namespace ReadModels.Example
 			PersonRegistry.Register(new FirstNameOrderByLastName());
 			PersonRegistry.Register(new LocationOrderByLastName());
 			//add additional indexes here...
-			container.RegisterInstance<IIndexRegistry<Person>>(PersonRegistry);
+
 			container.RegisterType<IEntityRepository<Person>, RedisEntityRepository<Person>>(new ContainerControlledLifetimeManager());
 			container.RegisterType<IIndexUpdater<Person>, RedisIndexUpdater<Person>>(new ContainerControlledLifetimeManager());
 			container.RegisterType<IEntityIndexer<Person>, EntityIndexer<Person>>(new ContainerControlledLifetimeManager());
@@ -75,15 +76,14 @@ namespace ReadModels.Example
 
 			Console.WriteLine("Query for Persons associated to Location 1 and 2");
 			var query = new IndexQuery<Person>();
-			var indexes = container.Resolve<IIndexRegistry<Person>>();
-			query.AddIndex(indexes.Find<LocationOrderByLastName>(), 1.ToString(CultureInfo.InvariantCulture), 2.ToString(CultureInfo.InvariantCulture));
+			query.AddIndex(new LocationOrderByLastName(), 1.ToString(CultureInfo.InvariantCulture), 2.ToString(CultureInfo.InvariantCulture));
 			var repo = container.Resolve<IEntityRepository<Person>>();
 			Dump(repo.Find(query));
 
 			Console.WriteLine("Query for all Persons in Location ID 2, LastName='Crumb'");
 			query = new IndexQuery<Person>();
-			query.AddIndex(indexes.Find<LocationOrderByLastName>(), 2.ToString(CultureInfo.InvariantCulture));
-			query.AddIndex(indexes.Find<LastNameOrderByLastName>(), "Crumb");
+			query.AddIndex(new LocationOrderByLastName(), 2.ToString(CultureInfo.InvariantCulture));
+			query.AddIndex(new LastNameOrderByLastName(), "Crumb");
 
 			Dump(repo.Find(query));
 

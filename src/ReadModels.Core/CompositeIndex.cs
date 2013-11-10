@@ -10,7 +10,7 @@ namespace ReadModels.Core
 
 		public CompositeIndex(IEnumerable<IIndex<T>> indexes)
 		{
-			_indexes = indexes.Where(i=> i.IsComposable).OrderBy(i => i.Id).ToList();
+			_indexes = indexes.Where(i=> i.IsComposable).OrderBy(i => i.Name).ToList();
 		}
 
 		public override IEnumerable<string> CreateKeys(T entity)
@@ -59,9 +59,9 @@ namespace ReadModels.Core
 			throw new NotImplementedException("CompositeIndex is for writing only");
 		}
 
-		public override int Id
+		public override string Name
 		{
-			get { return _indexes.Sum(i => i.Id); }
+			get { return string.Join(":", _indexes.Select(i => i.Name).ToArray()); }
 		}
 	}
 }

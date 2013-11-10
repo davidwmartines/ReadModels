@@ -71,7 +71,6 @@
     <Compile Include="ICompositeIndex.cs" />
     <Compile Include="IEntityRepository.cs" />
     <Compile Include="IIndex.cs" />
-    <Compile Include="IIndexRegistry.cs" />
     <Compile Include="IIndexUpdater.cs" />
     <Compile Include="EntityIndexer.cs" />
     <Compile Include="IndexComposer.cs" />
@@ -79,7 +78,7 @@
     <Compile Include="Index.cs" />
     <Compile Include="IndexQuery.cs" />
     <Compile Include="IndexQueryResult.cs" />
-    <Compile Include="UnityIndexRegistry.cs" />
+    <Compile Include="Containers\Unity\UnityIndexRegistry.cs" />
     <Compile Include="IEntityIndexer.cs" />
     <Compile Include="PowerSet.cs" />
     <Compile Include="Redis\RedisEntityRepository.cs" />

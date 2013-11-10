@@ -13,11 +13,9 @@ namespace ReadModels.Core
 			return CreateKey(propertyValue);
 		}
 
-		public abstract int Id { get; }
-
 		protected string CreateKey(string propertyValue)
 		{
-			return string.Concat(Id, ":", propertyValue);
+			return string.Concat(typeof(T).Name, ":", Name, ":", propertyValue);
 		}
 
 		public virtual bool IsComposable
@@ -27,5 +25,14 @@ namespace ReadModels.Core
 				return true;
 			}
 		}
+
+		public virtual string Name
+		{
+			get
+			{
+				return GetType().Name;
+			}
+		}
+
 	}
 }

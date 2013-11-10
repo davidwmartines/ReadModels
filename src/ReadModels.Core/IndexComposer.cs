@@ -16,7 +16,7 @@ namespace ReadModels.Core
 
 		public string CreateCompositeIndex()
 		{
-			var indexes = _indexes.Keys.OrderBy(i => i.Id);
+			var indexes = _indexes.Keys.OrderBy(i => i.Name);
 			var indexKeys = new List<string>();
 			foreach (var index in indexes)
 			{
