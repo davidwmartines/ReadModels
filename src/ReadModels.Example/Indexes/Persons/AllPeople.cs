@@ -3,7 +3,7 @@ using ReadModels.Example.Model;
 
 namespace ReadModels.Example.Indexes.Persons
 {
-	public class AllPersonsOrderByLastName: PersonIndexOrderByLastName
+	public class AllPeople: PersonIndex
 	{
 		public override IEnumerable<string> CreateKeys(Person entitiy)
 		{

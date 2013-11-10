@@ -6,7 +6,6 @@ namespace ReadModels.Core
 	{
 		IEnumerable<string> CreateKeys(T entity);
 		string FindKey(string propertyValue);
-		IEnumerable<T> SortEntries(IEnumerable<T> items);
 		bool IsComposable { get; }
 		string Name { get; }
 	}

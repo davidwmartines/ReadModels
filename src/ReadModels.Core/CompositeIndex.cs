@@ -31,11 +31,6 @@ namespace ReadModels.Core
 			return compositeKeys;
 		}
 
-		public override IEnumerable<T> SortEntries(IEnumerable<T> items)
-		{
-			return _indexes.First().SortEntries(items);
-		}
-
 		public static string MakeCompositeKey(string[] indexKeys)
 		{
 			return string.Join("|", indexKeys);
@@ -47,11 +42,6 @@ namespace ReadModels.Core
 			{
 				return _indexes.Any();
 			}
-		}
-
-		public IEnumerable<IIndex<T>> ListIndexes()
-		{
-			return _indexes.AsReadOnly();
 		}
 
 		public override string FindKey(string propertyValue)

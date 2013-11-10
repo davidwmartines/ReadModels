@@ -2,11 +2,15 @@
 {
 	public class IndexQuery<T>
 	{
+		const int _defaultPageSize = 50;
+
 		private IndexComposer<T> _indexComposer = new IndexComposer<T>();
 		
 		public int? PageSize { get; set; }
 
 		public int? PageIndex { get; set; }
+
+		public ISort<T> Sort { get; set; }
 
 		public void AddIndex(IIndex<T> index, params string[] propertyValues)
 		{
@@ -19,6 +23,15 @@
 			{
 				return _indexComposer.CreateCompositeIndex();
 			}
+		}
+
+		public int? CalculateSkip()
+		{
+			if (PageIndex.HasValue)
+			{
+				return ((PageIndex.Value - 1) * (PageSize ?? _defaultPageSize));
+			}
+			return PageIndex;	
 		}
 	}
 }

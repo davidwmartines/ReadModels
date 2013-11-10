@@ -3,11 +3,16 @@ using ReadModels.Example.Model;
 
 namespace ReadModels.Example.Indexes.Persons
 {
-	public class LastNameOrderByLastName : PersonIndexOrderByLastName
+	public class Keyword : PersonIndex
 	{
 		public override IEnumerable<string> CreateKeys(Person entity)
 		{
-			yield return CreateKey(entity.LastName);
+			return new string[]
+			{
+				CreateKey(entity.FirstName),
+				CreateKey(entity.LastName),
+				CreateKey(entity.FullName)
+			};
 		}
 	}
 }

@@ -14,9 +14,9 @@ namespace ReadModels.Example.Indexes.Persons
 			return new string[0];
 		}
 
-		public override IEnumerable<Person> SortEntries(IEnumerable<Person> items)
-		{
-			return items.OrderBy(i => i.DateOfBirth);
-		}
+		//public override IEnumerable<Person> SortEntries(IEnumerable<Person> items)
+		//{
+		//	return items.OrderBy(i => i.DateOfBirth);
+		//}
 	}
 }

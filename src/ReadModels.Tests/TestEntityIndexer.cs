@@ -21,19 +21,19 @@ namespace ReadModels.Core.Tests
 		{
 			var indexes = new IIndex<Person>[]
 			{ 
-				new FirstNameOrderByLastName(),
-				new LocationOrderByLastName()
+				new FirstName(),
+				new Locations()
 			};
 
 			var indexer = new EntityIndexer<Person>(_mockIndexUpdater.Object, indexes);
 
-			var Person = new Person { Id = 1 };
+			var person = new Person { Id = 1 };
 
-			indexer.AddEntries(Person);
+			indexer.AddEntries(person);
 
-			_mockIndexUpdater.Verify(i => i.AddEntry(indexes[0], Person), Times.Once());
-			_mockIndexUpdater.Verify(i => i.AddEntry(indexes[1], Person), Times.Once());
-			_mockIndexUpdater.Verify(i => i.AddComposite(It.IsAny<ICompositeIndex<Person>>(), Person), Times.Once());
+			_mockIndexUpdater.Verify(i => i.AddEntry(indexes[0], person), Times.Once());
+			_mockIndexUpdater.Verify(i => i.AddEntry(indexes[1], person), Times.Once());
+			_mockIndexUpdater.Verify(i => i.AddComposite(It.IsAny<ICompositeIndex<Person>>(), person), Times.Once());
 		}
 
 		[Test]
@@ -41,19 +41,19 @@ namespace ReadModels.Core.Tests
 		{
 			var indexes = new IIndex<Person>[]
 			{ 
-				new FirstNameOrderByLastName(),
-				new LocationOrderByLastName()
+				new FirstName(),
+				new Locations()
 			};
 
 			var indexer = new EntityIndexer<Person>(_mockIndexUpdater.Object, indexes);
 
-			var Person = new Person { Id = 1 };
+			var person = new Person { Id = 1 };
 
-			indexer.RemoveEntries(Person);
+			indexer.RemoveEntries(person);
 
-			_mockIndexUpdater.Verify(i => i.RemoveEntry(indexes[0], Person), Times.Once());
-			_mockIndexUpdater.Verify(i => i.RemoveEntry(indexes[1], Person), Times.Once());
-			_mockIndexUpdater.Verify(i => i.RemoveEntry(It.IsAny<ICompositeIndex<Person>>(), Person), Times.Once());
+			_mockIndexUpdater.Verify(i => i.RemoveEntry(indexes[0], person), Times.Once());
+			_mockIndexUpdater.Verify(i => i.RemoveEntry(indexes[1], person), Times.Once());
+			_mockIndexUpdater.Verify(i => i.RemoveEntry(It.IsAny<ICompositeIndex<Person>>(), person), Times.Once());
 		}
 	}
 }

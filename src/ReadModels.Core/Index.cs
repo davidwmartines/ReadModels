@@ -6,8 +6,6 @@ namespace ReadModels.Core
 	{
 		public abstract IEnumerable<string> CreateKeys(T entity);
 
-		public abstract IEnumerable<T> SortEntries(IEnumerable<T> items);
-
 		public virtual string FindKey(string propertyValue)
 		{
 			return CreateKey(propertyValue);
@@ -15,7 +13,7 @@ namespace ReadModels.Core
 
 		protected string CreateKey(string propertyValue)
 		{
-			return string.Concat(typeof(T).Name, ":", Name, ":", propertyValue);
+			return string.Concat(typeof(T).Name, ":", Name, ":", propertyValue).ToUpperInvariant();
 		}
 
 		public virtual bool IsComposable

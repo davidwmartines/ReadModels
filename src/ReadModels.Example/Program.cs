@@ -6,6 +6,7 @@ using ReadModels.Core.Containers.Unity;
 using ReadModels.Core.Redis;
 using ReadModels.Example.Indexes.Persons;
 using ReadModels.Example.Model;
+using ReadModels.Example.Sorts.Persons;
 using ServiceStack.Redis;
 using ServiceStack.Text;
 
@@ -26,11 +27,11 @@ namespace ReadModels.Example
 
 					//DemoPersonLocations(redisClient);
 
-					//DemoPersons(redisClient);
+					DemoPersons(redisClient);
 
 					//DemoUserRepository(redisClient);
 
-					DemoContainer(redisClient);
+					//DemoContainer(redisClient);
 
 				}
 			}
@@ -49,16 +50,24 @@ namespace ReadModels.Example
 
 			container.RegisterType<IRedisClient>(new InjectionFactory(c => redisClient));
 
-			var PersonRegistry = new UnityIndexRegistry<Person>(container);
-			PersonRegistry.Register(new AllPersonsOrderByLastName());
-			PersonRegistry.Register(new LastNameOrderByLastName());
-			PersonRegistry.Register(new FirstNameOrderByLastName());
-			PersonRegistry.Register(new LocationOrderByLastName());
+			var personIndexRegistry = new UnityIndexRegistry<Person>(container);
+			personIndexRegistry.Register(new AllPeople());
+			personIndexRegistry.Register(new LastName());
+			personIndexRegistry.Register(new FirstName());
+			personIndexRegistry.Register(new Locations());
 			//add additional indexes here...
+
+			var personSortRegistry = new UnitySortRegistry<Person>(container);
+			personSortRegistry.Register(new OrderByFirstName());
+			personSortRegistry.Register(new OrderByLastName());
+			//add additional sorts here...
 
 			container.RegisterType<IEntityRepository<Person>, RedisEntityRepository<Person>>(new ContainerControlledLifetimeManager());
 			container.RegisterType<IIndexUpdater<Person>, RedisIndexUpdater<Person>>(new ContainerControlledLifetimeManager());
 			container.RegisterType<IEntityIndexer<Person>, EntityIndexer<Person>>(new ContainerControlledLifetimeManager());
+			container.RegisterType<ISortUpdater<Person>, RedisSortUpdater<Person>>(new ContainerControlledLifetimeManager());
+			container.RegisterType<IEntitySorter<Person>, EntitySorter<Person>>(new ContainerControlledLifetimeManager());
+
 			container.RegisterType<IEntityPersister<Person>, EntityPersister<Person>>(new ContainerControlledLifetimeManager());
 
 			//////
@@ -72,18 +81,20 @@ namespace ReadModels.Example
 			persister.Store(new Person() { Id = 5, FirstName = "Ernie", LastName = "Eggs", Locations = new PersonLocation[] { new PersonLocation { LocationId = 3 } } });
 			persister.Store(new Person() { Id = 26, FirstName = "Zep", LastName = "Zappa" });
 
-			ShowStats(container.Resolve<IIndexUpdater<Person>>() as RedisIndexUpdater<Person>);
+			ShowIndexStats(container.Resolve<IIndexUpdater<Person>>() as RedisIndexUpdater<Person>);
+			ShowSortHashes(container.Resolve<ISortUpdater<Person>>() as RedisSortUpdater<Person>);
 
 			Console.WriteLine("Query for Persons associated to Location 1 and 2");
 			var query = new IndexQuery<Person>();
-			query.AddIndex(new LocationOrderByLastName(), 1.ToString(CultureInfo.InvariantCulture), 2.ToString(CultureInfo.InvariantCulture));
+			query.Sort = new OrderByLastName() { IsDescending = true };
+			query.AddIndex(new Locations(), 1.ToString(CultureInfo.InvariantCulture), 2.ToString(CultureInfo.InvariantCulture));
 			var repo = container.Resolve<IEntityRepository<Person>>();
 			Dump(repo.Find(query));
 
 			Console.WriteLine("Query for all Persons in Location ID 2, LastName='Crumb'");
 			query = new IndexQuery<Person>();
-			query.AddIndex(new LocationOrderByLastName(), 2.ToString(CultureInfo.InvariantCulture));
-			query.AddIndex(new LastNameOrderByLastName(), "Crumb");
+			query.AddIndex(new Locations(), 2.ToString(CultureInfo.InvariantCulture));
+			query.AddIndex(new LastName(), "Crumb");
 
 			Dump(repo.Find(query));
 
@@ -96,14 +107,24 @@ namespace ReadModels.Example
 
 			var indexes = new IIndex<Person>[]
 			{ 
-				new AllPersonsOrderByLastName(),
-				new FirstNameOrderByLastName(),
-				new LastNameOrderByLastName(), 
-				new LocationOrderByLastName()
+				new AllPeople(),
+				new FirstName(),
+				new LastName(), 
+				new Locations()
 			};
 
 			var indexer = new EntityIndexer<Person>(indexUpdater, indexes);
-			var persister = new EntityPersister<Person>(repo, indexer);
+
+			var sortUpdater = new RedisSortUpdater<Person>(redisClient);
+			var sorts = new ISort<Person>[]
+			{
+				new OrderByLastName(),
+				new OrderByFirstName(),
+			};
+			var sorter = new EntitySorter<Person>(sortUpdater, sorts);
+
+			//set up persister
+			var persister = new EntityPersister<Person>(repo, indexer, sorter);
 
 			Console.WriteLine("Creating Persons");
 			persister.Store(new Person() { Id = 1, FirstName = "Adam", LastName = "Ant", Locations = new PersonLocation[] { new PersonLocation { LocationId = 1 } } });
@@ -114,22 +135,22 @@ namespace ReadModels.Example
 			persister.Store(new Person() { Id = 26, FirstName = "Zep", LastName = "Zappa" });
 
 			Console.WriteLine("Resulting Indexes");
-			ShowStats(indexUpdater);
+			ShowIndexStats(indexUpdater);
 
 			Console.WriteLine("Query for all Persons in Location ID 1");
 			var query = new IndexQuery<Person>();
-			query.AddIndex(new LocationOrderByLastName(), 1.ToString(CultureInfo.InvariantCulture));
+			query.AddIndex(new Locations(), 1.ToString(CultureInfo.InvariantCulture));
 			Dump(repo.Find(query));
 
 			Console.WriteLine("Query for all Persons in Location ID 2, LastName='Crumb'");
 			query = new IndexQuery<Person>();
-			query.AddIndex(new LastNameOrderByLastName(), "Crumb");
-			query.AddIndex(new LocationOrderByLastName(), 2.ToString(CultureInfo.InvariantCulture));
+			query.AddIndex(new LastName(), "Crumb");
+			query.AddIndex(new Locations(), 2.ToString(CultureInfo.InvariantCulture));
 			Dump(repo.Find(query));
 
 		}
 
-		private static void ShowStats(RedisIndexUpdater<Person> indexUpdater)
+		private static void ShowIndexStats(RedisIndexUpdater<Person> indexUpdater)
 		{
 			foreach (var key in indexUpdater.Stats.Keys)
 			{
@@ -137,21 +158,41 @@ namespace ReadModels.Example
 			}
 		}
 
+		private static void ShowSortHashes(RedisSortUpdater<Person> sortUpdater)
+		{
+			foreach (var entry in sortUpdater.SortEntriesCreated)
+			{
+				Console.WriteLine(entry);
+			}
+		}
+
 		private static void DemoPersons(RedisClient redisClient)
 		{
-
+			//set up repo
 			var repo = new RedisEntityRepository<Person>(redisClient);
+			
+			//set up indexes
 			var indexUpdater = new RedisIndexUpdater<Person>(redisClient);
-
 			var indexes = new IIndex<Person>[]
 			{ 
-				new AllPersonsOrderByLastName(),
-				new FirstNameOrderByLastName(),
-				new LastNameOrderByLastName() 
+				new AllPeople(),
+				new FirstName(),
+				new LastName() 
 			};
 
 			var indexer = new EntityIndexer<Person>(indexUpdater, indexes);
-			var persister = new EntityPersister<Person>(repo, indexer);
+
+			//set up sorts
+			var sortUpdater = new RedisSortUpdater<Person>(redisClient);
+			var sorts = new ISort<Person>[]
+			{
+				new OrderByLastName(),
+				new OrderByFirstName(),
+			};
+			var sorter = new EntitySorter<Person>(sortUpdater, sorts);
+
+			//set up persister
+			var persister = new EntityPersister<Person>(repo, indexer, sorter);
 
 			Console.WriteLine("Creating Persons");
 			persister.Store(new Person() { Id = 1, FirstName = "Dave", LastName = "Martines" });
@@ -159,64 +200,84 @@ namespace ReadModels.Example
 			persister.Store(new Person() { Id = 3, FirstName = "William", LastName = "Smith" });
 			persister.Store(new Person() { Id = 4, FirstName = "Dave", LastName = "Jones" });
 			persister.Store(new Person() { Id = 5, FirstName = "Robert", LastName = "Smith" });
-			persister.Store(new Person() { Id = 6, FirstName = "Who", LastName = "Dini" });
+			persister.Store(new Person() { Id = 6, FirstName = "Who", LastName = "dini" });
 			persister.Store(new Person() { Id = 7, FirstName = "Who", LastName = "Dini" });
 			persister.Store(new Person() { Id = 8, FirstName = "John", LastName = "Doe", DateOfBirth = new DateTime(1970, 1, 1) });
+
+
+			ShowIndexStats(indexUpdater);
+
 
 			Console.WriteLine("Get by ID 2");
 			var result = repo.GetById(2);
 			Console.WriteLine(result.Dump<Person>());
 
-			Console.WriteLine("Query for all Persons, order by lastname, firstname");
+			Console.WriteLine("Query for all Persons, order by last name");
 			var query = new IndexQuery<Person>();
-			query.AddIndex(new AllPersonsOrderByLastName(), string.Empty);
+			query.AddIndex(new AllPeople(), string.Empty);
+			query.Sort = new OrderByLastName();
+			Dump(repo.Find(query));
+
+			Console.WriteLine("Query for all Persons, order by first name");
+			query = new IndexQuery<Person>();
+			query.AddIndex(new AllPeople(), string.Empty);
+			query.Sort = new OrderByFirstName();
 			Dump(repo.Find(query));
 
 			Console.WriteLine("Query by firstname = 'Dave'");
 			query = new IndexQuery<Person>();
-			query.AddIndex(new FirstNameOrderByLastName(), "Dave");
+			query.AddIndex(new FirstName(), "Dave");
+			query.Sort = new OrderByLastName();
 			Dump(repo.Find(query));
 
 			Console.WriteLine("Query by firstname = 'Who', lastname='Dini'");
 			query = new IndexQuery<Person>();
-			query.AddIndex(new FirstNameOrderByLastName(), "Who");
-			query.AddIndex(new LastNameOrderByLastName(), "Dini");
+			query.AddIndex(new FirstName(), "Who");
+			query.AddIndex(new LastName(), "Dini");
+			query.Sort = new OrderByLastName();
 			Dump(repo.Find(query));
 
 			Console.WriteLine("Query by firstname = 'William', lastname='Martines'");
 			query = new IndexQuery<Person>();
-			query.AddIndex(new FirstNameOrderByLastName(), "William");
-			query.AddIndex(new LastNameOrderByLastName(), "Martines");
+			query.AddIndex(new FirstName(), "William");
+			query.AddIndex(new LastName(), "Martines");
+			query.Sort = new OrderByLastName();
 			Dump(repo.Find(query));
 
 			Console.WriteLine("Query by firstname = 'David', lastname='Martines'");
 			query = new IndexQuery<Person>();
-			query.AddIndex(new FirstNameOrderByLastName(), "David");
-			query.AddIndex(new LastNameOrderByLastName(), "Martines");
+			query.AddIndex(new FirstName(), "David");
+			query.AddIndex(new LastName(), "Martines");
+			query.Sort = new OrderByLastName();
 			Dump(repo.Find(query));
 
 			Console.WriteLine("Update a Person");
 			persister.Store(new Person() { Id = 7, FirstName = "Harry", LastName = "Whodini" });
 
+			ShowIndexStats(indexUpdater);
+
 			Console.WriteLine("Query for all Persons, order by lastname, firstname");
 			query = new IndexQuery<Person>();
-			query.AddIndex(new AllPersonsOrderByLastName(), string.Empty);
+			query.AddIndex(new AllPeople(), string.Empty);
+			query.Sort = new OrderByLastName();
 			Dump(repo.Find(query));
 
 			Console.WriteLine("Query by firstname = 'Who', lastname='Dini'");
 			query = new IndexQuery<Person>();
-			query.AddIndex(new FirstNameOrderByLastName(), "Who");
-			query.AddIndex(new LastNameOrderByLastName(), "Dini");
+			query.AddIndex(new FirstName(), "Who");
+			query.AddIndex(new LastName(), "Dini");
 			Dump(repo.Find(query));
 
 			Console.WriteLine("Query by lastname = 'Whodini'");
 			query = new IndexQuery<Person>();
-			query.AddIndex(new LastNameOrderByLastName(), "Whodini");
+			query.AddIndex(new LastName(), "Whodini");
+			query.Sort = new OrderByLastName();
 			Dump(repo.Find(query));
 
 			Console.WriteLine("Query by lastname = 'whodini' (case sensitivity)");
 			query = new IndexQuery<Person>();
-			query.AddIndex(new LastNameOrderByLastName(), "whodini");
+			query.AddIndex(new LastName(), "whodini");
+			query.Sort = new OrderByLastName();
 			Dump(repo.Find(query));
 
 		}

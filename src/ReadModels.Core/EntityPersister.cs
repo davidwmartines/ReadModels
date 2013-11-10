@@ -5,15 +5,15 @@ namespace ReadModels.Core
 {
 	public class EntityPersister<T> : IEntityPersister<T>
 	{
-		const string _idField = "Id";
-
 		private readonly IEntityRepository<T> _entityRepository;
 		private readonly IEntityIndexer<T> _entityIndexer;
+		private readonly IEntitySorter<T> _entitySorter;
 
-		public EntityPersister(IEntityRepository<T> entityRepository, IEntityIndexer<T> entityIndexer)
+		public EntityPersister(IEntityRepository<T> entityRepository, IEntityIndexer<T> entityIndexer, IEntitySorter<T> entitySorter)
 		{
 			_entityRepository = entityRepository;
 			_entityIndexer = entityIndexer;
+			_entitySorter = entitySorter;
 		}
 
 		public void Store(T entity)
@@ -21,6 +21,7 @@ namespace ReadModels.Core
 			DeleteIfExists(entity);
 			_entityRepository.Add(entity);
 			_entityIndexer.AddEntries(entity);
+			_entitySorter.AddEntries(entity);
 		}
 
 		private void DeleteIfExists(T entity)
@@ -29,16 +30,14 @@ namespace ReadModels.Core
 			if (existingEntity != null)
 			{
 				_entityIndexer.RemoveEntries(existingEntity);
+				_entitySorter.RemoveEntries(existingEntity);
 				_entityRepository.Delete(entity);
 			}
 		}
 
 		private object GetId(T entity)
 		{
-			var property = typeof(T).GetProperty(_idField);
-			if (property == null)
-				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "The Type '{0}' is not compatible with '{1}'.  It must have an ID Property named '{2}'.", typeof(T).Name, GetType().Name, _idField));
-			return property.GetValue(entity);
+			return EntityIdUtility.GetId<T>(entity);
 		}
 	}
 }

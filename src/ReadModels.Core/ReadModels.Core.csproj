@@ -67,7 +67,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Containers\Unity\UnitySortRegistry.cs" />
+    <Compile Include="EntityIdUtility.cs" />
     <Compile Include="EntityPersister.cs" />
+    <Compile Include="EntitySorter.cs" />
     <Compile Include="ICompositeIndex.cs" />
     <Compile Include="IEntityRepository.cs" />
     <Compile Include="IIndex.cs" />
@@ -80,11 +83,16 @@
     <Compile Include="IndexQueryResult.cs" />
     <Compile Include="Containers\Unity\UnityIndexRegistry.cs" />
     <Compile Include="IEntityIndexer.cs" />
+    <Compile Include="ISort.cs" />
+    <Compile Include="IEntitySorter.cs" />
+    <Compile Include="ISortUpdater.cs" />
     <Compile Include="PowerSet.cs" />
     <Compile Include="Redis\RedisEntityRepository.cs" />
     <Compile Include="Redis\RedisIndexUpdater.cs" />
     <Compile Include="IEntityPersister.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Redis\RedisSortUpdater.cs" />
+    <Compile Include="Sort.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

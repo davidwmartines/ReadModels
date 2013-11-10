@@ -9,42 +9,46 @@ namespace ReadModels.Core.Tests
 	{
 		private Mock<IEntityRepository<Person>> _mockEntityRepository;
 		private Mock<IEntityIndexer<Person>> _mockEntityIndexer;
+		private Mock<IEntitySorter<Person>> _mockEntitySorter;
 
 		[SetUp]
 		public void SetUp()
 		{
 			_mockEntityIndexer = new Mock<IEntityIndexer<Person>>();
 			_mockEntityRepository = new Mock<IEntityRepository<Person>>();
+			_mockEntitySorter = new Mock<IEntitySorter<Person>>();
 		}
 
 		[Test]
 		public void StoresNewEntity()
 		{
 			_mockEntityRepository.Setup(p => p.GetById(1)).Returns(null as Person);
-			var persister = new EntityPersister<Person>(_mockEntityRepository.Object, _mockEntityIndexer.Object);
+			var persister = new EntityPersister<Person>(_mockEntityRepository.Object, _mockEntityIndexer.Object, _mockEntitySorter.Object);
 
-			var Person = new Person { Id = 1 };
-			persister.Store(Person);
+			var person = new Person { Id = 1 };
+			persister.Store(person);
 
-			_mockEntityRepository.Verify(r => r.Add(Person), Times.Once());
-			_mockEntityRepository.Verify(r => r.Delete(Person), Times.Never());
-			_mockEntityIndexer.Verify(i => i.AddEntries(Person), Times.Once());
+			_mockEntityRepository.Verify(r => r.Add(person), Times.Once());
+			_mockEntityRepository.Verify(r => r.Delete(person), Times.Never());
+			_mockEntityIndexer.Verify(i => i.AddEntries(person), Times.Once());
+			_mockEntitySorter.Verify(i => i.AddEntries(person), Times.Once());
 		}
 
 		[Test]
 		public void StoresExistingEntity()
 		{
-			var Person = new Person { Id = 1 };
+			var person = new Person { Id = 1 };
 
-			_mockEntityRepository.Setup(p => p.GetById(1)).Returns(Person);
+			_mockEntityRepository.Setup(p => p.GetById(1)).Returns(person);
 			
-			var persister = new EntityPersister<Person>(_mockEntityRepository.Object, _mockEntityIndexer.Object);
+			var persister = new EntityPersister<Person>(_mockEntityRepository.Object, _mockEntityIndexer.Object, _mockEntitySorter.Object);
 
-			persister.Store(Person);
+			persister.Store(person);
 
-			_mockEntityRepository.Verify(r => r.Add(Person), Times.Once());
-			_mockEntityRepository.Verify(r => r.Delete(Person), Times.Once());
-			_mockEntityIndexer.Verify(i => i.AddEntries(Person), Times.Once());
+			_mockEntityRepository.Verify(r => r.Add(person), Times.Once());
+			_mockEntityRepository.Verify(r => r.Delete(person), Times.Once());
+			_mockEntityIndexer.Verify(i => i.AddEntries(person), Times.Once());
+			_mockEntitySorter.Verify(i => i.AddEntries(person), Times.Once());
 		}
 	}
 }

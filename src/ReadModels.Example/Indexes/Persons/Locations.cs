@@ -5,7 +5,7 @@ using ReadModels.Example.Model;
 
 namespace ReadModels.Example.Indexes.Persons
 {
-	public class LocationOrderByLastName : PersonIndexOrderByLastName
+	public class Locations : PersonIndex
 	{
 		public override IEnumerable<string> CreateKeys(Person entity)
 		{
