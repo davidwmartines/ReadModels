@@ -20,4 +20,64 @@ As the read-model is updated to reflect changes in the write-model, indexes are 
 In this way, the performance of read-operations can be optimized without relying on standarad caching techniques, avoiding the issues related to caching such as stale data, invalidation schemes and warm-up times. (Caching can of course be added on top, to even further improve overall read-performance.) 
 
 
-TODO: examples...
+### Example
+
+```csharp
+//basic read model
+public class Person
+{
+	public int Id { get; set; }
+	public string FirstName { get; set; }
+	public string LastName { get; set; }
+	// etc...
+}
+
+// Requirement: able to search by FirstName and sort by LastName
+
+// 1.  Create an index class for searching by FirstName
+public class FirstNameIndex : Index<Person>
+{
+	public override IEnumerable<string> CreateKeys(Person entitiy)
+	{
+		yield return CreateKey(entitiy.FirstName);
+	}
+}
+
+// 2. Create a Sort class for sorting by LastName
+public class OrderByLastName : Sort<Person>
+{
+	public override string FindValue(Person entity)
+	{
+		// this will actually sort by LastName, then FirstName
+		return entity.LastName + " " + entity.FirstName;
+	}
+}
+
+// 3.  Register our new sort and index classes with the container
+// (typical code, not shown)
+
+/**** Test ****/
+
+// setup, add some people
+var persister = container.Resolve<IEntityPersister<Person>>();
+persister.Store(new Person() { Id = 1, FirstName = "John", LastName = "Smith" });
+persister.Store(new Person() { Id = 2, FirstName = "John", LastName = "Doe" });
+persister.Store(new Person() { Id = 3, FirstName = "Jane", LastName = "Doe" });	
+
+// act - build a query and pass it to a repository	
+var query = new IndexQuery<Person>();
+query.PageSize = 20;
+query.PageNumber = 1;
+query.Sort = new OrderByLastName();
+query.AddIndex(new FirstNameIndex(), "John");
+// can add more indexes to the query for intersection behavior...
+
+var repository = container.Resolve<IEntityRepository<Person>>();
+var result = respository.Find(query);
+
+// assert
+Assert.Equal(2, result.Results.Count()); // found 2 Johns
+Assert.True(result.Results.ElementAt(0).Id == 2); // first item is John Doe
+Assert.True(result.Results.ElementAt(1).Id == 1); // second item is John Smith		
+
+
