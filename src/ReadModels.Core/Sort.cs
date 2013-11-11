@@ -11,8 +11,13 @@ namespace ReadModels.Core
 			return string.Concat(_fullKeyPrefix, EntityIdUtility.GetId<T>(entity));
 		}
 
-		public abstract string FindValue(T entity);
+		public string FindValue(T entity)
+		{
+			return GetValueToSortBy(entity).ToUpperInvariant();
+		}
 
+		protected abstract string GetValueToSortBy(T entity);
+		
 		public virtual string Name
 		{
 			get

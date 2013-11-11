@@ -8,7 +8,7 @@
 		
 		public int? PageSize { get; set; }
 
-		public int? PageIndex { get; set; }
+		public int? PageNumber { get; set; }
 
 		public ISort<T> Sort { get; set; }
 
@@ -27,11 +27,11 @@
 
 		public int? CalculateSkip()
 		{
-			if (PageIndex.HasValue)
+			if (PageNumber.HasValue)
 			{
-				return ((PageIndex.Value - 1) * (PageSize ?? _defaultPageSize));
+				return ((PageNumber.Value - 1) * (PageSize ?? _defaultPageSize));
 			}
-			return PageIndex;	
+			return PageNumber;	
 		}
 	}
 }

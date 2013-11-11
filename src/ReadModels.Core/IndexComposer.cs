@@ -11,7 +11,6 @@ namespace ReadModels.Core
 		public void AddIndex(IIndex<T> index, params string[] values)
 		{
 			_indexes.Add(index, values);
-
 		}
 
 		public string CreateCompositeIndex()

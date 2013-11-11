@@ -4,7 +4,7 @@ namespace ReadModels.Example.Sorts.Persons
 {
 	public class OrderByFirstName : PersonSort
 	{
-		public override string FindValue(Person entity)
+		protected override string GetValueToSortBy(Person entity)
 		{
 			return entity.FirstName + " " + entity.LastName;
 		}

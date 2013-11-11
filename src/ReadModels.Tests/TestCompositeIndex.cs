@@ -18,14 +18,13 @@ namespace ReadModels.Tests
 				new FirstName(),
 				new LastName()
 			};
-
 			var composite = new CompositeIndex<Person>(indexes);
-
 			var person = new Person{Id = 1, FirstName = "A", LastName = "B"};
-
+			
 			var keys = composite.CreateKeys(person);
 
 			Assert.AreEqual(1, keys.Count());
+			Assert.AreEqual("PERSON:FIRSTNAME:A|PERSON:LASTNAME:B", keys.ElementAt(0));
 		}
 
 		[Test]
@@ -80,6 +79,31 @@ namespace ReadModels.Tests
 			var keys = composite.CreateKeys(person);
 
 			Assert.AreEqual(11, keys.Count());
+		}
+
+		[Test]
+		public void CreatesSameKeyRegardlessOfOrderOfIndexes()
+		{
+			var indexes = new IIndex<Person>[]
+			{ 
+				new FirstName(),
+				new LastName()
+			};
+			var composite = new CompositeIndex<Person>(indexes);
+			var person = new Person { Id = 1, FirstName = "A", LastName = "B" };
+
+			var key1 = composite.CreateKeys(person).ElementAt(0);
+
+			var indexes2 = new IIndex<Person>[]
+			{ 
+				new LastName(),
+				new FirstName()
+			};
+			var composite2 = new CompositeIndex<Person>(indexes2);
+
+			var key2 = composite2.CreateKeys(person).ElementAt(0);
+
+			Assert.AreEqual(key1, key2);
 		}
 	}
 }
